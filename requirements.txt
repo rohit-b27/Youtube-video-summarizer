@@ -1,0 +1,23 @@
+# Core Libraries
+pytube
+youtube-transcript-api
+requests
+
+# Transcription
+openai-whisper
+torch
+
+# Summarization
+transformers
+sentencepiece
+
+# Orchestration and Agents
+langchain
+openai
+
+# Web Framework
+flask
+flask-cors
+
+# Deployment
+gunicorn
