@@ -2,7 +2,7 @@
 pytube
 youtube-transcript-api
 requests
-
+python-dotenv
 # Transcription
 openai-whisper
 torch
@@ -14,7 +14,7 @@ sentencepiece
 # Orchestration and Agents
 langchain
 openai
-
+langchain_community
 # Web Framework
 flask
 flask-cors
