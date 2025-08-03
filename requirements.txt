@@ -4,6 +4,7 @@ yt-dlp
 youtube-transcript-api
 requests
 python-dotenv
+pandas
 
 # Transcription (Local)
 openai-whisper
