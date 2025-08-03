@@ -1,20 +1,26 @@
 # Core Libraries
 pytube
+yt-dlp
 youtube-transcript-api
 requests
 python-dotenv
-# Transcription
-openai-whisper
-torch
 
-# Summarization
+# Transcription (Local)
+openai-whisper
+faster-whisper
+torch
+ffmpeg-python
+
+# Summarization (LLM-based)
 transformers
 sentencepiece
+openai  # still included in case fallback is needed
+groq
 
-# Orchestration and Agents
+# Orchestration and LangChain
 langchain
-openai
 langchain_community
+
 # Web Framework
 flask
 flask-cors

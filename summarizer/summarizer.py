@@ -1,43 +1,50 @@
-# summarizer/summarizer.py
 import os
+import requests
 from dotenv import load_dotenv
-from langchain.chat_models import ChatOpenAI
-from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain
 
 load_dotenv()
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 class Summarizer:
     def __init__(self):
-        self.llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY, temperature=0.7,model = "gpt-4o-mini")
+        self.api_url = "https://api.groq.com/openai/v1/chat/completions"
+        self.headers = {
+            "Authorization": f"Bearer {GROQ_API_KEY}",
+            "Content-Type": "application/json"
+        }
 
     def summarize(self, text):
-        prompt = PromptTemplate(
-            input_variables=["text"],
-            template="Summarize the following text in a concise manner:\n\n{text}"
-        )
-        chain = LLMChain(llm=self.llm, prompt=prompt)
-        return chain.run(text=text).strip()
+        payload = {
+            "model": "llama3-8b-8192",
+            "messages": [
+                {"role": "user", "content": f"Summarize the following text in a concise and informative paragraph:\n\n{text}"}
+            ],
+            "temperature": 0.7
+        }
+
+        try:
+            response = requests.post(self.api_url, headers=self.headers, json=payload)
+            result = response.json()
+            return result["choices"][0]["message"]["content"].strip()
+        except Exception as e:
+            print(f"[ERROR] Summarization failed: {e}")
+            return "❌ Could not generate summary."
 
     def summarize_with_metadata(self, text, metadata):
         title = metadata.get("title", "")
         description = metadata.get("description", "")
         tags = ", ".join(metadata.get("tags", []))
 
-        prompt_text = f"""
-        The following is the transcript of a YouTube video:
+        prompt = f"""
+        You are given a YouTube video's transcript and metadata.
         Title: {title}
         Description: {description}
         Tags: {tags}
 
-        Summarize the transcript below, using the above context for better accuracy:
-
+        Transcript:
         {text}
+
+        Provide a concise and informative summary considering the above metadata.
         """
-        prompt = PromptTemplate(
-            input_variables=["text"],
-            template="{text}"
-        )
-        chain = LLMChain(llm=self.llm, prompt=prompt)
-        return chain.run(text=prompt_text).strip()
+
+        return self.summarize(prompt)

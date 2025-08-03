@@ -1,25 +1,38 @@
-# tools/youtube_fetcher.py
 from youtube_transcript_api import YouTubeTranscriptApi
-from pytube import YouTube
+import yt_dlp
+import re
 
-def fetch_transcript(video_id):
-    """
-    Attempts to fetch the transcript for a given YouTube video_id.
-    Returns:
-        transcript_text (str) if found, else None.
-    """
+def extract_video_id(url_or_id):
+    if len(url_or_id) == 11 and "http" not in url_or_id:
+        return url_or_id
+
+    match = re.search(r"(?:v=|\/)([0-9A-Za-z_-]{11}).*", url_or_id)
+    if match:
+        return match.group(1)
+
+    raise ValueError("Invalid YouTube URL or ID")
+
+def fetch_transcript(url_or_id):
     try:
+        video_id = extract_video_id(url_or_id)
         transcript = YouTubeTranscriptApi.get_transcript(video_id)
         transcript_text = " ".join([entry["text"] for entry in transcript])
         return transcript_text
     except Exception as e:
-        print(f"No transcript found: {e}")
+        print(f"[Transcript] Not available: {e}")
         return None
 
-def get_audio_stream_url(video_url):
-    """
-    Given a YouTube video URL, return the audio-only stream URL.
-    """
-    yt = YouTube(video_url)
-    audio_stream = yt.streams.filter(only_audio=True).first()
-    return audio_stream.url
+def get_audio_stream_url(url):
+    from yt_dlp import YoutubeDL
+    try:
+        ydl_opts = {
+            'format': 'bestaudio[ext=mp3]/bestaudio[ext=m4a]/bestaudio/best',
+            'quiet': True,
+            'skip_download': True,
+        }
+        with YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=False)
+            return info['url']
+    except Exception as e:
+        print(f"[yt_dlp] Failed to fetch audio stream: {e}")
+        return None
